@@ -1,39 +1,53 @@
-import React from "react";
-import ReactDOM from "react-dom";
+import React, {useState, useEffect} from 'react';
+import ReactDOM from 'react-dom';
+import Hammer from 'hammerjs';
+import TouchEmulator from 'hammer-touchemulator';
+import {useAudio} from 'react-use';
 
 import "./styles.css";
 
+TouchEmulator();
+
 
 //------------------------------------------------------------------------------
-import {useState, useEffect} from "react";
-import Hammer from 'hammerjs';
-console.log(Hammer);
+function useHammer() {
+  const [ev, setEv] = useState({});
 
-function hammer() {
-  const myElement = document.querySelector('#root');
-  const myOptions = {};
+  const el = document.querySelector('#root');
+  const mc = new Hammer.Manager(el);
 
-  const [ev, setEv] = useState('');
+  mc.add(new Hammer.Tap({ event: 'doubletap', taps: 2 }));
+  mc.add(new Hammer.Tap());
 
-  const hammertime = new Hammer(myElement, myOptions);
-  hammertime.on('swipe', function(ev) {
-    console.log(ev.angle);
-    setEv(JSON.stringify(ev.angle));
+  mc.on("doubletap", ev => {
+    setEv(ev);
+  });
+  mc.on("tap", ev => {
+    setEv(ev);
   });
 
   return ev;
 }
 
+
+
 //------------------------------------------------------------------------------
 
 
 function App() {
-  const evStr = hammer();
+  const ev = useHammer();
+  console.log(ev);
+  const [audio, state, controls, ref] = useAudio({
+    src: 'https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg',
+    // src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+    autoPlay: true,
+  });
+  console.log(state);
   return (
     <div className="App">
+      {audio}
       <h1>Hello CodeSandbox</h1>
       <h2>Start editing to see some magic happen!</h2>
-      <p>{evStr}</p>
     </div>
   );
 }
