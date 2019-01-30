@@ -1,113 +1,81 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import Hammer from 'hammerjs';
-// import TouchEmulator from 'hammer-touchemulator';
 import {useAudio} from 'react-use';
+import Hammer from 'hammerjs';
+import TouchEmulator from 'hammer-touchemulator';
 
-import "./styles.css";
-
-// TouchEmulator();
-
-
-//------------------------------------------------------------------------------
-let l = 0;
-let k = 0;
-function useWindowWidth() {
-  const [width, setWidth] = useState(window.innerWidth);
-
-  l += 1;
-  console.log('l', l);
-
-  useEffect(() => {
-    k += 1;
-    console.log('k', k);
-    const handleResize = () => setWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  })
-
-  return width;
-}
+import './styles.css';
 
 
-let i = 0;
-let j = 0;
-function useHammer() {
+TouchEmulator();
+
+
+function useHammer(element, recognizers) {
   const [ev, setEv] = useState({});
 
-  i += 1;
-  // console.log('i', i);
+  const mc = new Hammer.Manager(element);
+  recognizers.map(recognizer => mc.add(recognizer));
 
   useEffect(() => {
-    const el = document.querySelector('#root');
-    j += 1;
-    // console.log('j', j);
-    const mc = new Hammer.Manager(el);
-
-    mc.add(new Hammer.Tap({ event: 'doubletap', taps: 2 }));
-    mc.add(new Hammer.Tap());
-
-    mc.on("doubletap", ev => {
-      setEv(ev);
-    });
-    mc.on("tap", ev => {
-      setEv(ev);
-    });
+    recognizers.map(recognizer =>
+      mc.on(recognizer.options.event, ev => {
+        setEv(ev);
+      })
+    );
 
     return (() => {
-      mc.off("doubletap");
-      mc.off("tap");
-    })
+      recognizers.map(recognizer =>
+        mc.off(recognizer.options.event)
+      );
+    });
   })
 
   return ev;
 }
 
 
-function useTimestamp() { //ev) {
-  const [timestamp, setTimestamp] = useState(0);
-
-  const ev = useHammer();
-
-  useEffect(() => {
-    // console.log(ev);
-    // console.log(timestamp, ev.timeStamp);
-    if (!!ev.timeStamp && timestamp !== ev.timeStamp) {
-      console.log(timestamp, ev.timeStamp, ev);
-      setTimestamp(ev.timeStamp);
-    }
-  });
-
-  return timestamp;
-}
-
-
-//------------------------------------------------------------------------------
-
-
 function App() {
-  // const ev = useHammer();
-  // console.log(ev);
-  // const [audio, state, controls, ref] = useAudio({
-  //   src: 'https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg',
-  //   // src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-  //   autoPlay: true,
-  // });
-  // console.log(state);
-  // const ts = useTimestamp();
-  // const width = useWindowWidth();
-  // console.log(width);
-  const ev = useHammer();
-  console.log('ev', ev.type);
+  const [lastTimeStamp, setLastTimeStamp] = useState(0);
+
+  const ev = useHammer(
+    document.getElementById('root'),
+    [
+      new Hammer.Tap({ event: 'doubletap', taps: 2 }),
+      new Hammer.Pinch(),
+      new Hammer.Swipe({ direction: Hammer.DIRECTION_HORIZONTAL }),
+    ],
+  );
+
+  const ev2src = (ev) =>
+    ev.type === 'doubletap'
+    ? 'https://raw.githubusercontent.com/aramadia/willow-sound/master/E/E04.ogg'
+    : ev.type === 'pinch'
+    ? 'https://raw.githubusercontent.com/aramadia/willow-sound/master/E/E11.ogg'
+    : ev.type === 'pinch'
+    ? 'https://raw.githubusercontent.com/aramadia/willow-sound/master/E/E08.ogg'
+    : 'https://raw.githubusercontent.com/aramadia/willow-sound/master/E/E10.ogg';
+
+  console.log(ev)
+
+  let [audio, state, controls, ref]  = useAudio({
+    src: ev2src(ev),
+    autoPlay: false,
+  });
+  useEffect(() => {
+    if (lastTimeStamp !== ev.timeStamp) {
+      // controls.play();
+      setLastTimeStamp(ev.timeStamp);
+    }
+  })
+
   return (
     <div className="App">
-      <h1>Hello CodeSandbox</h1>
+      {audio}
+      <h1>{ev.type} {ev.scale} {ev.isFinal} Hello CodeSandbox {lastTimeStamp}</h1>
       <h2>Start editing to see some magic happen!</h2>
     </div>
   );
 }
 
-const rootElement = document.getElementById("root");
+const rootElement = document.getElementById('root');
 ReactDOM.render(<App />, rootElement);
