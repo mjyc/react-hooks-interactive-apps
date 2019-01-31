@@ -1,22 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
-import { useDeviceOrientation, useDeviceMotion } from 'the-platform';
+import {useDeviceOrientation, useDeviceMotion} from 'the-platform';
 
 import './styles.css';
 
 
 function App() {
-  const { alpha, beta, gamma, absolute } = useDeviceOrientation();
-  const { acceleration, rotationRate, interval } = useDeviceMotion();
-  console.log(alpha, beta, gamma, absolute);
-  console.log(acceleration, rotationRate, interval);
+  const {alpha, beta, gamma, absolute} = useDeviceOrientation();
+  console.log('alpha', alpha, 'beta', beta, 'gamma', gamma, 'absolute', absolute);
+  const {acceleration, rotationRate, interval} = useDeviceMotion();
+  console.log('acceleration', acceleration, 'rotationRate', rotationRate, 'interval', interval);
 
-  // useEffect(() => {
-  //   if (lastTimeStamp !== ev.timeStamp) {
-  //     controls.play();
-  //     setLastTimeStamp(ev.timeStamp);
-  //   }
-  // })
+  if (Math.abs(acceleration.x) > 2 || Math.abs(acceleration.y) > 2) {
+    navigator.vibrate(200);
+  } else if (Math.abs(acceleration.x) > 4 || Math.abs(acceleration.y) > 4) {
+    navigator.vibrate(400);
+  }
 
   const divStyle = {
     height: '100vh',
@@ -34,14 +33,12 @@ function App() {
         alpha: {alpha} <br />
         beta: {beta} <br />
         gamma: {gamma} <br />
-        absolute: {absolute} <br />
       </div>
       <div style={{fontSize: '2em'}}>Device Motion</div>
       <div>
         acceleration.x: {acceleration.x} <br />
         acceleration.y: {acceleration.y} <br />
         acceleration.z: {acceleration.z} <br />
-        interval: {interval} <br />
       </div>
     </div>
   );
