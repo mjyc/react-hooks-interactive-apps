@@ -54,6 +54,7 @@ function App() {
     ? 'https://raw.githubusercontent.com/aramadia/willow-sound/master/E/E08.ogg'
     : 'https://raw.githubusercontent.com/aramadia/willow-sound/master/E/E10.ogg';
 
+  // eslint-disable-next-line
   const [audio, state, controls, _]  = useAudio({
     src: ev2src(ev),
     autoPlay: false,
