@@ -5,6 +5,10 @@ import {useDeviceOrientation, useDeviceMotion} from 'the-platform';
 import './styles.css';
 
 
+function isAndroid() {
+  return /Android/i.test(navigator.userAgent);
+}
+
 function App() {
   const {alpha, beta, gamma, absolute} = useDeviceOrientation();
   console.log('alpha', alpha, 'beta', beta, 'gamma', gamma, 'absolute', absolute);
@@ -26,15 +30,20 @@ function App() {
     justifyContent: 'center',
     alignItems: 'center',
   };
-  return (
+  return !isAndroid() ? (
+    <div style={divStyle}>
+      <h1>This app only works on Android devices</h1>
+      <h2>Please try it on an an Android device</h2>
+    </div>
+  ) : (
     <div className="App" style={divStyle}>
-      <div style={{fontSize: '2em'}}>Device Orientation</div>
+      <div style={{ fontSize: "2em" }}>Device Orientation</div>
       <div>
         alpha: {alpha} <br />
         beta: {beta} <br />
         gamma: {gamma} <br />
       </div>
-      <div style={{fontSize: '2em'}}>Device Motion</div>
+      <div style={{ fontSize: "2em" }}>Device Motion</div>
       <div>
         acceleration.x: {acceleration.x} <br />
         acceleration.y: {acceleration.y} <br />
